@@ -5,9 +5,6 @@ export class JefitSignupPage {
     readonly maleOption: Locator;
     readonly femaleOption: Locator;
     readonly continueButton: Locator;
-    readonly feetInput: Locator;
-    readonly inchInput: Locator;
-    readonly weightInput: Locator;
     readonly trainingGoalTitle: Locator;
     readonly bulkingGoal: Locator;
     readonly strengthGoal: Locator;
@@ -22,6 +19,16 @@ export class JefitSignupPage {
     readonly bulkGoal: Locator;
     readonly berserkGoal: Locator;
     readonly targetZonesTitle: Locator;
+    readonly fitnessLevelTitle: Locator;
+    readonly newToFitness: Locator;
+    readonly beginnerLevel: Locator;
+    readonly intermediateLevel: Locator;
+    readonly advancedLevel: Locator;
+    readonly heightTitle: Locator;
+    readonly heightFeetInput: Locator;
+    readonly heightInchesInput: Locator;
+    readonly weightTitle: Locator;
+    readonly weightInput: Locator;
 
     constructor(page: Page) {
         this.page = page;
@@ -46,10 +53,21 @@ export class JefitSignupPage {
         this.berserkGoal = page.locator('div, span, [role="radio"]').filter({ hasText: /^berserk$/i }).last();
 
         this.targetZonesTitle = page.getByText("What are your target zones?");
+
+        this.fitnessLevelTitle = page.getByText("What is your fitness level?");
+        this.newToFitness = page.locator('div, span, [role="radio"]').filter({ hasText: /^new to fitness$/i }).last();
+        this.beginnerLevel = page.locator('div, span, [role="radio"]').filter({ hasText: /^beginner$/i }).last();
+        this.intermediateLevel = page.locator('div, span, [role="radio"]').filter({ hasText: /^intermediate$/i }).last();
+        this.advancedLevel = page.locator('div, span, [role="radio"]').filter({ hasText: /^advanced$/i }).last();
+
+        this.heightTitle = page.getByText("What is your height?");
+        this.heightFeetInput = page.locator('#heightFeet');
+        this.heightInchesInput = page.locator('#heightInches');
+
+        this.weightTitle = page.getByText("What is your current weight?");
+        this.weightInput = page.locator('#weight');
+
         this.continueButton = page.getByRole('button', { name: /continue/i });
-        this.feetInput = page.locator('input').first();
-        this.inchInput = page.locator('input').nth(1);
-        this.weightInput = page.locator('input[type="number"], input[placeholder*="weight"]');
     }
 
     async selectGender(gender: 'Male' | 'Female') {
@@ -60,12 +78,7 @@ export class JefitSignupPage {
 
     async selectTrainingGoal(goal: 'Bulking' | 'Strength' | 'Cutting' | 'Maintaining') {
         await expect(this.trainingGoalTitle).toBeVisible({ timeout: 10000 });
-        const goalMap = {
-            'Bulking': this.bulkingGoal,
-            'Strength': this.strengthGoal,
-            'Cutting': this.cuttingGoal,
-            'Maintaining': this.maintainingGoal
-        };
+        const goalMap = { 'Bulking': this.bulkingGoal, 'Strength': this.strengthGoal, 'Cutting': this.cuttingGoal, 'Maintaining': this.maintainingGoal };
         const option = goalMap[goal];
         await option.waitFor({ state: 'visible' });
         await option.click();
@@ -73,11 +86,7 @@ export class JefitSignupPage {
 
     async selectCurrentBuild(build: 'Skinny' | 'Average' | 'Overweight') {
         await expect(this.currentBuildTitle).toBeVisible({ timeout: 10000 });
-        const buildMap = {
-            'Skinny': this.skinnyBuild,
-            'Average': this.averageBuild,
-            'Overweight': this.overweightBuild
-        };
+        const buildMap = { 'Skinny': this.skinnyBuild, 'Average': this.averageBuild, 'Overweight': this.overweightBuild };
         const option = buildMap[build];
         await option.waitFor({ state: 'visible' });
         await option.click();
@@ -85,11 +94,7 @@ export class JefitSignupPage {
 
     async selectGoalBodyType(type: 'Shredded' | 'Bulk' | 'Berserk') {
         await expect(this.goalBodyTitle).toBeVisible({ timeout: 10000 });
-        const typeMap = {
-            'Shredded': this.shreddedGoal,
-            'Bulk': this.bulkGoal,
-            'Berserk': this.berserkGoal
-        };
+        const typeMap = { 'Shredded': this.shreddedGoal, 'Bulk': this.bulkGoal, 'Berserk': this.berserkGoal };
         const option = typeMap[type];
         await option.waitFor({ state: 'visible' });
         await option.click();
@@ -103,12 +108,33 @@ export class JefitSignupPage {
         await this.continueButton.click();
     }
 
-    async fillMeasurements(ft: string, inch: string, lbs: string) {
-        await expect(this.feetInput).toBeVisible();
-        await this.feetInput.fill(ft);
-        await this.inchInput.fill(inch);
+    async selectFitnessLevel(level: 'New to fitness' | 'Beginner' | 'Intermediate' | 'Advanced') {
+        await expect(this.fitnessLevelTitle).toBeVisible({ timeout: 10000 });
+        const levelMap = { 'New to fitness': this.newToFitness, 'Beginner': this.beginnerLevel, 'Intermediate': this.intermediateLevel, 'Advanced': this.advancedLevel };
+        const option = levelMap[level];
+        await option.waitFor({ state: 'visible' });
+        await option.click();
+    }
+
+    async fillHeight(ft: string, inch: string) {
+        await expect(this.heightTitle).toBeVisible({ timeout: 10000 });
+        await this.heightFeetInput.fill(ft);
+        await this.heightInchesInput.fill(inch);
+        await this.continueButton.click();
+    }
+
+    async getHeightFeetValidationMessage() {
+        return await this.heightFeetInput.evaluate((node: HTMLInputElement) => node.validationMessage);
+    }
+
+    async fillWeight(lbs: string) {
+        await expect(this.weightTitle).toBeVisible({ timeout: 10000 });
         await this.weightInput.fill(lbs);
         await this.continueButton.click();
+    }
+
+    async getWeightValidationMessage() {
+        return await this.weightInput.evaluate((node: HTMLInputElement) => node.validationMessage);
     }
 }
 
